@@ -42,7 +42,10 @@ export function getSessionCookieOptions(
   return {
     httpOnly: true,
     path: "/",
-    sameSite: "none",
+    // OAuth returns to this app via a top-level GET. Lax is more compatible
+    // with privacy-focused browsers while still sending cookies to same-origin
+    // tRPC requests after the callback.
+    sameSite: "lax",
     secure: isSecureRequest(req),
   };
 }
