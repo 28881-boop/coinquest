@@ -8,6 +8,7 @@ import { invokeLLM } from "./_core/llm";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { calculateThaiTax } from "../shared/tax";
 
 const categorySchema = z.string().min(1).max(80);
 const transactionInput = z.object({
@@ -226,7 +227,11 @@ export const appRouter = router({
       get: protectedProcedure.query(({ ctx }) => ensureProgress(ctx.user.id)),
       setRealityLevel: protectedProcedure.input(z.object({ level: z.enum(["gentle", "tease", "ouch", "serious"]) })).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db) throw new Error("Database is not configured"); await ensureProgress(ctx.user.id); await db.update(userProgress).set({ realityLevel: input.level }).where(eq(userProgress.userId, ctx.user.id)); return { success: true } as const; }),
     }),
-    tax: router({ estimate: publicProcedure.input(z.object({ annualIncome: z.number().nonnegative(), deductions: z.number().nonnegative().default(0) })).query(({ input }) => { const taxable = Math.max(0, input.annualIncome - 60000 - input.deductions); const bands = [[150000, 0], [150000, 0.05], [200000, 0.1], [250000, 0.15], [1000000, 0.2], [Infinity, 0.35]] as const; let remaining = taxable; let tax = 0; for (const [width, rate] of bands) { const slice = Math.min(remaining, width); if (slice <= 0) break; tax += slice * rate; remaining -= slice; } return { taxable, tax: Math.round(tax), effectiveRate: taxable ? tax / input.annualIncome : 0 }; }) }),
+    tax: router({
+      estimate: protectedProcedure.input(z.object({
+        salaryIncome: z.number().nonnegative(), otherIncome: z.number().nonnegative(), withholding: z.number().nonnegative(), spouseNoIncome: z.boolean(), parents: z.array(z.object({ age: z.number().nonnegative(), annualIncome: z.number().nonnegative() })), childrenTotal: z.number().int().nonnegative(), childrenBornSince2561: z.number().int().nonnegative(), disabledDependents: z.number().int().nonnegative(), age65PlusOrDisabled: z.boolean(), lifeInsurance: z.number().nonnegative(), parentHealthInsurance: z.number().nonnegative(), socialSecurity: z.number().nonnegative(), providentFund: z.number().nonnegative(), rmf: z.number().nonnegative(), homeLoanInterest: z.number().nonnegative(), donations: z.number().nonnegative(), otherAllowances: z.number().nonnegative(),
+      })).query(({ input }) => calculateThaiTax(input)),
+    }),
   }),
 });
 
