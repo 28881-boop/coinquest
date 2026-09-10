@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
@@ -46,8 +46,34 @@ export const userProgress = mysqlTable("userProgress", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+export const receipts = mysqlTable("receipts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  fileKey: varchar("fileKey", { length: 255 }).notNull(),
+  fileUrl: varchar("fileUrl", { length: 500 }).notNull(),
+  mimeType: varchar("mimeType", { length: 80 }).notNull(),
+  status: mysqlEnum("status", ["processing", "parsed", "needs_review", "failed"]).default("processing").notNull(),
+  parsedAmount: int("parsedAmount"),
+  parsedCategory: varchar("parsedCategory", { length: 80 }),
+  parsedNote: varchar("parsedNote", { length: 255 }),
+  parsedOccurredAt: timestamp("parsedOccurredAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const missionClaims = mysqlTable("missionClaims", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  missionKey: varchar("missionKey", { length: 80 }).notNull(),
+  xpAwarded: int("xpAwarded").notNull(),
+  claimedAt: timestamp("claimedAt").defaultNow().notNull(),
+}, table => ({
+  userMissionUnique: uniqueIndex("missionClaims_user_mission_unique").on(table.userId, table.missionKey),
+}));
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Transaction = typeof transactions.$inferSelect;
 export type Goal = typeof goals.$inferSelect;
 export type UserProgress = typeof userProgress.$inferSelect;
+export type Receipt = typeof receipts.$inferSelect;
+export type MissionClaim = typeof missionClaims.$inferSelect;

@@ -15,6 +15,13 @@
       "when": 1789042407002,
       "tag": "0001_white_morlun",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1789044711396,
+      "tag": "0002_chunky_captain_britain",
+      "breakpoints": true
     }
   ]
 }
