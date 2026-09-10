@@ -25,4 +25,10 @@ describe("finance feature authorization", () => {
       }),
     ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
+
+  it("protects personal AI analysis from unauthenticated users", async () => {
+    await expect(
+      publicCaller().finance.ai.analyzeSpending({ days: 30 }),
+    ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+  });
 });
