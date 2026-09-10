@@ -94,11 +94,12 @@ export const appRouter = router({
       for (const row of monthRows.filter(item => item.type === "expense")) categoryMap.set(row.category, (categoryMap.get(row.category) ?? 0) + row.amount);
       const categories = Array.from(categoryMap.entries()).map(([category, amount]) => ({ category, amount })).sort((a, b) => b.amount - a.amount);
       const todayExpense = todayRows.filter(row => row.type === "expense").reduce((sum, row) => sum + row.amount, 0);
+      const realityLevel = progress?.realityLevel === "tease" ? "gentle" : progress?.realityLevel ?? "gentle";
       const claimed = new Set(claims.map(item => item.missionKey));
       const day = todayKey();
       const foodToday = todayRows.filter(row => row.type === "expense" && row.category === "อาหาร").reduce((sum, row) => sum + row.amount, 0);
       const missions = missionDefinitions.map(mission => ({ ...mission, claimed: claimed.has(`${mission.key}:${day}`), claimable: mission.key === "log_first" ? todayRows.length > 0 : mission.key === "food_budget" ? foodToday > 0 && foodToday <= 150 : userGoals.some(goal => goal.savedAmount > 0) }));
-      return { summary: { income, expense, balance: income - expense, todayExpense }, categories, transactions: allRows.slice(0, 8), goals: userGoals, progress: progress ?? { xp: 0, level: 1, streak: 0, realityLevel: "tease" }, missions, realityCheck: buildRealityCheck(todayExpense, progress?.realityLevel ?? "tease") };
+      return { summary: { income, expense, balance: income - expense, todayExpense }, categories, transactions: allRows.slice(0, 8), goals: userGoals, progress: progress ? { ...progress, realityLevel } : { xp: 0, level: 1, streak: 0, realityLevel: "gentle" }, missions, realityCheck: buildRealityCheck(todayExpense, realityLevel) };
     }),
     transactions: router({
       list: protectedProcedure.query(({ ctx }) => listTransactions(ctx.user.id)),
