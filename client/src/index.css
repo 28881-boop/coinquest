@@ -106,13 +106,21 @@ button:active { transform: scale(.98); }
     0%, 100% { transform: translateY(0) rotate(0deg); }
     50% { transform: translateY(-9px) rotate(3deg); }
   }
+  @keyframes mascot-celebrate {
+    0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+    18% { transform: translateY(-12px) rotate(-8deg) scale(1.08); }
+    38% { transform: translateY(0) rotate(8deg) scale(.98); }
+    58% { transform: translateY(-16px) rotate(-5deg) scale(1.06); }
+    78% { transform: translateY(-2px) rotate(4deg) scale(1.02); }
+  }
   .mascot-bounce { animation: mascot-bounce .65s cubic-bezier(.23, 1, .32, 1); }
   .mascot-idle { animation: mascot-idle 3.8s ease-in-out infinite; }
   .mascot-sway { animation: mascot-sway 3.2s ease-in-out infinite; }
   .mascot-peek { animation: mascot-peek 3.6s ease-in-out infinite; }
   .mascot-float { animation: mascot-float 3s ease-in-out infinite; }
+  .mascot-celebrate { animation: mascot-celebrate 1.15s cubic-bezier(.23, 1, .32, 1) both; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mascot-idle, .mascot-sway, .mascot-peek, .mascot-float { animation: none; }
+  .mascot-idle, .mascot-sway, .mascot-peek, .mascot-float, .mascot-celebrate { animation: none; }
 }
