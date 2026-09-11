@@ -86,5 +86,33 @@ button:active { transform: scale(.98); }
     68% { transform: translateY(-8px) rotate(-2deg) scale(1.02); }
     100% { transform: translateY(0) rotate(0deg) scale(1); }
   }
+  @keyframes mascot-idle {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    35% { transform: translateY(-5px) rotate(-2deg); }
+    70% { transform: translateY(2px) rotate(2deg); }
+  }
+  @keyframes mascot-sway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    30% { transform: translateX(-5px) rotate(-4deg); }
+    65% { transform: translateX(5px) rotate(4deg); }
+  }
+  @keyframes mascot-peek {
+    0%, 100% { transform: translateY(0) scale(1); }
+    35% { transform: translateY(-8px) scale(1.03); }
+    55% { transform: translateY(1px) scale(.98); }
+    75% { transform: translateY(-3px) scale(1.01); }
+  }
+  @keyframes mascot-float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-9px) rotate(3deg); }
+  }
   .mascot-bounce { animation: mascot-bounce .65s cubic-bezier(.23, 1, .32, 1); }
+  .mascot-idle { animation: mascot-idle 3.8s ease-in-out infinite; }
+  .mascot-sway { animation: mascot-sway 3.2s ease-in-out infinite; }
+  .mascot-peek { animation: mascot-peek 3.6s ease-in-out infinite; }
+  .mascot-float { animation: mascot-float 3s ease-in-out infinite; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-idle, .mascot-sway, .mascot-peek, .mascot-float { animation: none; }
 }
