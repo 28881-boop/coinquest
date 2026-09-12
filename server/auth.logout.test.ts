@@ -60,3 +60,12 @@ describe("auth.logout", () => {
     });
   });
 });
+
+describe("developer.verifyPin", () => {
+  it("validates the server-side developer secret through the API", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const result = await caller.developer.verifyPin({ pin: "2580" });
+    expect(result).toEqual({ success: true });
+  });
+});

@@ -6,6 +6,7 @@ import { ensureProgress, getDb, listGoals, listTransactions } from "./db";
 import { storageGetSignedUrl, storagePut } from "./storage";
 import { invokeLLM } from "./_core/llm";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { ENV } from "./_core/env";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { calculateThaiTax } from "../shared/tax";
@@ -76,6 +77,11 @@ const receiptData = z.object({ dataUrl: z.string().max(8000000), fileName: z.str
 const receiptConfirm = z.object({ receiptId: z.number().int().positive(), type: z.enum(["income", "expense"]).default("expense"), amount: z.number().int().positive(), category: categorySchema, note: z.string().max(255).optional(), occurredAt: z.string().optional() });
 
 export const appRouter = router({
+  developer: router({
+    verifyPin: protectedProcedure.input(z.object({ pin: z.string().length(4) })).mutation(({ input }) => ({
+      success: Boolean(ENV.developerPin) && input.pin === ENV.developerPin,
+    })),
+  }),
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -112,7 +118,9 @@ export const appRouter = router({
       update: protectedProcedure.input(transactionInput.extend({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
         const db = await getDb(); if (!db) throw new Error("Database is not configured");
         const result = await db.update(transactions).set({ type: input.type, amount: input.amount, category: input.category, note: input.note, occurredAt: input.occurredAt ? new Date(input.occurredAt) : undefined }).where(and(eq(transactions.id, input.id), eq(transactions.userId, ctx.user.id)));
-        return { success: true, changed: result[0]?.affectedRows ?? 0 } as const;
+        const changed = result[0]?.affectedRows ?? 0;
+        if (!changed) throw new Error("ไม่พบรายการนี้ หรือรายการไม่ใช่ของบัญชีคุณ");
+        return { success: true, changed } as const;
       }),
       remove: protectedProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => { const db = await getDb(); if (!db) throw new Error("Database is not configured"); await db.delete(transactions).where(and(eq(transactions.id, input.id), eq(transactions.userId, ctx.user.id))); return { success: true } as const; }),
     }),
